@@ -6,41 +6,20 @@ from gensim import corpora, models, similarities
 
 database = 'ziburi'
 
-df = pd.read_csv('all_ziburi.csv')
-
-textary = df['text'].as_matrix()
-
-t = Tokenizer('dict.csv')
-
-wakachilist = []
-for item in textary:
-    wordlist = []
-    tokens = t.tokenize(item)
-    for token in tokens:
-        check = token.part_of_speech.split(',')
-        if check[0] == '名詞':
-            wordlist.append(token.surface)
-        elif check[0] != '記号':
-            wordlist.append(token.base_form)
-    
-    wakachilist.append(wordlist)
-
-dictionary = corpora.Dictionary(wakachilist)
-
 conn = sqlite3.connect(database+'.db')
 
 c = conn.cursor()
 
 feature = 30
 
-input = np.zeros((len(wakachilist),feature))
+input = np.zeros((len(wakachi),feature))
 
-for i in range(0, len(wakachilist)):
+for i in range(0, len(wakachi)):
     length = feature
-    if len(wakachilist[i]) < feature:
-        length = len(wakachilist[i])
+    if len(wakachi[i]) < feature:
+        length = len(wakachi[i])
     for j in range(0, length):
-        c.execute("select id from corpus where word = '"+wakachilist[i][j]+"'")
+        c.execute("select id from corpus where word = '"+wakachi[i][j]+"'")
         for row in c:
             input[i][j] = row[0]
         
