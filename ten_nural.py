@@ -1,13 +1,15 @@
 import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
 import random
 
-input_size = 30
-hidden_size = 500
+input_size = 50
+hidden_size = 100
 label_size = 8
 rate = 0.0001
-iteration = 20000
+iteration = 10000
 samle = 100
-check = 2000
+check = iteration / 100
 
 # 入力データ（300次元の文書データ）
 x = tf.placeholder(tf.float32, [None, input_size])
@@ -55,6 +57,8 @@ sess.run(init)
 print("START TRAINING")
 
 # トレーニング（20000回のイテレーション）
+left = []
+height = []
 for i in range(iteration):
     # training_xyは、事前準備しておいた学習用データ（文書ベクトルとラベルがタプルで入っているリスト）
     # ミニバッチ（100件ランダムで取得）
@@ -66,8 +70,21 @@ for i in range(iteration):
     # 2000回毎に正解率を確認
     if i % check == 0:
         a = sess.run(accuracy, feed_dict={x: batch_xs, y_: batch_ys})
+        height.append(a)
         print("TRAINING(%d): %.0f%%" % (i, (a * 100.0)))
     
+
+# 折れ線グラフを出力
+for i in range(len(height)):
+    left.append(i + 1)
+
+plt.xlim(0, len(height))
+plt.ylim(0, 1.1)
+plt.plot(left, height)
+
+plt.show()
+
+
 
 
 
