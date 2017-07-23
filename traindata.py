@@ -32,7 +32,7 @@ conn = sqlite3.connect(database+'.db')
 
 c = conn.cursor()
 
-feature = 30
+feature = 50
 
 input = np.zeros((len(wakachi),feature))
 
