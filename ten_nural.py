@@ -1,3 +1,4 @@
+import os
 import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
@@ -17,13 +18,13 @@ x = tf.placeholder(tf.float32, [None, input_size])
 y_ = tf.placeholder(tf.float32, [None, label_size])
 
 # 隠れ層のWeight
-W_h = tf.Variable(tf.random_normal([input_size, hidden_size], mean=0.0, stddev=0.05))
+W_h = tf.Variable(tf.random_normal([input_size, hidden_size], mean=0.0, stddev=0.05), name = 'W_h')
 # 出力層のWeight
-W_o = tf.Variable(tf.random_normal([hidden_size, label_size], mean=0.0, stddev=0.05))
+W_o = tf.Variable(tf.random_normal([hidden_size, label_size], mean=0.0, stddev=0.05), name = 'W_o')
 # 隠れ層のバイアス
-b_h = tf.Variable(tf.zeros([hidden_size]))
+b_h = tf.Variable(tf.zeros([hidden_size]), name = 'b_h')
 # 出力層のバイアス
-b_o = tf.Variable(tf.zeros([label_size]))
+b_o = tf.Variable(tf.zeros([label_size]), name = 'b_o')
 
 # 隠れ層（シグモイド関数）
 h = tf.sigmoid(tf.matmul(x, W_h) + b_h)
@@ -92,3 +93,27 @@ plt.show()
 # test_x, test_yは事前準備しておいたテストデータ
 a = sess.run(accuracy, feed_dict={x: test_x, y_: test_y})
 print("TEST DATA ACCURACY: %.0f%%" % (a * 100.0))
+
+
+
+
+
+saver = tf.train.Saver()
+saver.save(sess, os.getcwd() + '/model.ckpt')
+
+
+
+# 隠れ層のWeight
+W_h = tf.Variable(0, name = 'W_h')
+# 出力層のWeight
+W_o = tf.Variable(0, name = 'W_o')
+# 隠れ層のバイアス
+b_h = tf.Variable(0, name = 'b_h')
+# 出力層のバイアス
+b_o = tf.Variable(0, name = 'b_o')
+
+saver = tf.train.Saver()
+with tf.Session() as sess:
+    saver.restore(sess, os.getcwd() + '/model.ckpt')
+
+
