@@ -33,8 +33,6 @@ c = conn.cursor()
 
 feature = 30
 
-#############################
-
 input = np.zeros((len(wakachilist),feature))
 
 for i in range(0, len(wakachilist)):
