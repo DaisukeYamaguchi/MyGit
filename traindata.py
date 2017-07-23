@@ -6,6 +6,28 @@ from gensim import corpora, models, similarities
 
 database = 'ziburi'
 
+df = pd.read_csv('all_ziburi.csv')
+
+textary = df['text'].as_matrix()
+titleary = df['title'].as_matrix()
+
+t = Tokenizer('dict.csv')
+
+wakachi = []
+for item in textary:
+    wordlist = []
+    tokens = t.tokenize(item)
+    for token in tokens:
+        check = token.part_of_speech.split(',')
+        if check[0] == '名詞':
+            wordlist.append(token.surface)
+        elif check[0] != '記号':
+            wordlist.append(token.base_form)
+    
+    wakachi.append(wordlist)
+
+dictionary = corpora.Dictionary(wakachi)
+
 conn = sqlite3.connect(database+'.db')
 
 c = conn.cursor()
@@ -27,7 +49,6 @@ for i in range(0, len(wakachi)):
 
 input = input.astype(np.int)
 
-titleary = df['title'].as_matrix()
 
 label = []
 for item in titleary:
