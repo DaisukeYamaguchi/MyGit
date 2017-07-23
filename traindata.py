@@ -4,6 +4,8 @@ import pandas as pd
 from janome.tokenizer import Tokenizer
 from gensim import corpora, models, similarities
 
+database = 'ziburi'
+
 df = pd.read_csv('all_ziburi.csv')
 
 textary = df['text'].as_matrix()
@@ -25,52 +27,15 @@ for item in textary:
 
 dictionary = corpora.Dictionary(wakachilist)
 
-id = [list(dictionary.token2id.values())]
-id.append(list(dictionary.token2id.keys()))
-
-id = np.array(id).T
-
-conn = sqlite3.connect('example.db')
+conn = sqlite3.connect(database+'.db')
 
 c = conn.cursor()
-
-c.execute('''CREATE TABLE corpus (word text, id integer)''')
-
-sql = 'INSERT INTO corpus VALUES (?,?)'
-words = list(dictionary.token2id.items())
-
-c.executemany(sql, words)
-
-conn.commit()
-
-conn.close()
-
-size = []
-for item in wakachilist:
-    size.append(len(item))
-
-size = np.array(size)
-
-
-
-import matplotlib.pyplot as plt
-
-fig = plt.figure()
-ax = fig.add_subplot(1,1,1)
-
-ax.hist(size, bins=50)
-ax.set_title('first histogram $\mu=100,\ \sigma=15$')
-ax.set_xlabel('x')
-ax.set_ylabel('freq')
-fig.show()
 
 feature = 30
 
+#############################
+
 input = np.zeros((len(wakachilist),feature))
-
-conn = sqlite3.connect('example.db')
-
-c = conn.cursor()
 
 for i in range(0, len(wakachilist)):
     length = feature
@@ -85,45 +50,7 @@ for i in range(0, len(wakachilist)):
 
 input = input.astype(np.int)
 
-c.execute("select * from corpus")
-for row in c:
-    print(row[0],row[1])
-
-conn.close()
-
 titleary = df['title'].as_matrix()
-
-unique = np.array(list(set(titleary)))
-
-onehotrary = np.identity(len(unique))
-
-onehotlist = []
-for item in onehotrary:
-    onehotlist.append(','.join(list(item.astype(int).astype(str))))
-
-temp = np.c_[unique, np.array(onehotlist)]
-
-classset = []
-for item in temp:
-    classset.append(tuple(item))
-
-conn = sqlite3.connect('example.db')
-
-c = conn.cursor()
-
-c.execute('''CREATE TABLE class (label text, onehotvec text)''')
-
-sql = 'INSERT INTO class VALUES (?,?)'
-
-c.executemany(sql, classset)
-
-conn.commit()
-
-conn.close()
-
-conn = sqlite3.connect('example.db')
-
-c = conn.cursor()
 
 label = []
 for item in titleary:
@@ -133,4 +60,10 @@ for item in titleary:
     
 
 label = np.array(label).astype(int)
+
+conn.close()
+
+training_xy = []
+for i in range(0, len(input)):
+    training_xy.append([tuple(input[i]),tuple(label[i])])
 
