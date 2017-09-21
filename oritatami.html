@@ -33,3 +33,14 @@
 <!-- 記事内容終わり -->
 
 </div>
+
+1
+2
+3
+4
+5
+mask = indices != np.arange(indices.shape[0])[:,np.newaxis]
+mask[:,-1] &= np.logical_not(mask.all(axis=1))
+shape = (indices.shape[0], indices.shape[1] - 1)
+indices = indices[mask].reshape(shape)
+distances = distances[mask].reshape(shape)
