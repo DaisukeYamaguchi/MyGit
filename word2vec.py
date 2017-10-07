@@ -1,36 +1,43 @@
 # -*- coding: utf-8 -*-
-import sqlite3
+import os
+import numpy as np
+from janome.tokenizer import Tokenizer
 from gensim.models import word2vec
 
-database = 'ziburi'
+file = 'all_ziburi.csv'
+
+text = []
+with open(file, 'r', encoding = 'utf8') as f:
+    for line in f:
+        text.append(line.rstrip('\n').split(',')[0])
+
+t = Tokenizer()
+
+if os.path.isfile(file + '.wkc'):
+    os.remove(file + '.wkc')
+
+with open(file + '.wkc', 'a', encoding = 'utf8') as f:
+    for i in range(len(text)):
+        line = []
+        tokens = t.tokenize(text[i])
+        for token in tokens:
+            if '名詞' == token.part_of_speech.split(',')[0]:
+                line.append(token.surface)
+            elif '動詞' == token.part_of_speech.split(',')[0]:
+                line.append(token.base_form)
+        f.write(' '.join(line))
+        f.write('\n')
+
 dimension = 50
 
-data = word2vec.Text8Corpus('all_ziburi_text.wkc')
-model = word2vec.Word2Vec(data, size = dimension)
+sentences = word2vec.LineSentence(file + '.wkc')
+model = word2vec.Word2Vec(sentences, size=dimension, min_count=1, window=3)
 
-columns = 'word text'
-for i in range(dimension):
-    columns += ', var' + str(i+1) + ' real'
 
-query = ['?' for i in range(dimension + 1)]
 
-sql = 'INSERT INTO word2vec VALUES (' + ','.join(query) + ')'
+results = model.most_similar(positive='飛行', topn=10)
 
-word = list(model.vocab.keys())
-words = []
-for item1 in word:
-    temp = []
-    temp.append(item1)
-    for item2 in model[item1]:
-        temp.append(item2)
-    
-    words.append(temp)
+for result in results:
+    print(result[0], '\t', result[1])
 
-conn = sqlite3.connect(database+'.db')
-
-c = conn.cursor()
-
-c.execute('''CREATE TABLE word2vec (''' + str(columns) + ''')''')
-
-c.executemany(sql, words)
 
